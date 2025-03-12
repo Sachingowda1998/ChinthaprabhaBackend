@@ -5,7 +5,7 @@ const {
   approveRejectPractiseVideo,
   getVideoStatus,
   getAllPractiseVideos,
-} = require('../controllers/PractiseVideoController');
+} = require('../controllers/practiseVideoController');
 
 const router = express.Router();
 
