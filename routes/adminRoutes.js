@@ -1,12 +1,18 @@
-// routes/adminRoutes.js
 const express = require('express');
 const { registerAdmin, loginAdmin } = require('../controllers/adminController');
+
 const router = express.Router();
 
-// Route for admin registration
+// Register Route
 router.post('/register', registerAdmin);
 
-// Route for admin login
+// Login Route
 router.post('/login', loginAdmin);
 
 module.exports = router;
+
+/* 
+{
+    "email": "bikash3@gmail.com",
+    "password": "dev1@1234"
+  } */

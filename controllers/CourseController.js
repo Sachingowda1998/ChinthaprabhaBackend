@@ -394,12 +394,12 @@ exports.deleteCourse = async (req, res) => {
 exports.addLesson = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { name, duration ,lessonNumber,lessonIntro} = req.body;
+    const {/*  name, duration , */lessonNumber,lessonIntro} = req.body;
 
     // Validate required fields
-    if (!name || !duration) {
+   /*  if (!name || !duration) {
       return res.status(400).json({ message: "All fields (name, duration) are required" });
-    }
+    } */
 
     // Check if the course exists
     const course = await Course.findById(courseId);
@@ -418,10 +418,10 @@ exports.addLesson = async (req, res) => {
 
     // Create the lesson
     const lesson = new Lesson({
-      name,
+     /*  name, */
       lessonNumber,
       lessonIntro,
-      duration,
+      /* duration, */
       videoUrls,
       course: courseId,
     });
@@ -442,10 +442,10 @@ exports.addLesson = async (req, res) => {
 exports.updateLesson = async (req, res) => {
   try {
     const { lessonId } = req.params;
-    const { name, lessonNumber, lessonIntro,duration, videoUrls } = req.body;
+    const { /* name, */ lessonNumber, lessonIntro,/* duration,  */videoUrls } = req.body;
 
     // Validate required fields
-    if (!name ||!lessonNumber || !lessonIntro  || !duration || !videoUrls) {
+    if (/* !name ||! */lessonNumber || !lessonIntro  || /* !duration || */ !videoUrls) {
       return res.status(400).json({ message: "All fields (name, duration, videoUrls) are required" });
     }
 
@@ -456,7 +456,7 @@ exports.updateLesson = async (req, res) => {
 
     const lesson = await Lesson.findByIdAndUpdate(
       lessonId,
-      { name, lessonNumber, lessonIntro, duration, videoUrls },
+      {/*  name,  */lessonNumber, lessonIntro,/*  duration, */ videoUrls },
       { new: true }
     );
 

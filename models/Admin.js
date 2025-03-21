@@ -1,4 +1,3 @@
-// models/Admin.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -7,6 +6,7 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    trim: true,
     lowercase: true,
   },
   password: {
@@ -15,18 +15,19 @@ const adminSchema = new mongoose.Schema({
   },
 });
 
-// Pre-save hook to hash password before saving
+// Hash password before saving
 adminSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
   next();
 });
 
-// Method to compare passwords during login
-adminSchema.methods.comparePassword = function (password) {
-  return bcrypt.compare(password, this.password);
+// Compare password
+adminSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const Admin = mongoose.model('Admin', adminSchema);
+
 module.exports = Admin;

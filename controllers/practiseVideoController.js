@@ -103,7 +103,16 @@ exports.getVideoStatus = async (req, res) => {
 // Fetch all practice videos for admin
 exports.getAllPractiseVideos = async (req, res) => {
   try {
-    const practiseVideos = await PractiseVideo.find().populate('lessonId userId');
+    const practiseVideos = await PractiseVideo.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'lessonId',
+        populate: {
+          path: 'course',
+          model: 'Course',
+        },
+      })
+      .populate('userId');
     res.status(200).json({ practiseVideos });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching practice videos', error: error.message });

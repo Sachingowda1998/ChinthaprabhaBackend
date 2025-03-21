@@ -1,58 +1,61 @@
-// controllers/adminController.js
 const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Admin registration
-exports.registerAdmin = async (req, res) => {
+// Register Admin
+const registerAdmin = async (req, res) => {
+  console.log("Request Body:", req.body); // Add this line to log the request body
   const { email, password } = req.body;
 
   try {
+    // Check if admin already exists
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
       return res.status(400).json({ message: 'Admin already exists' });
     }
 
-    const newAdmin = new Admin({ email, password });
-    await newAdmin.save();
+    // Create new admin
+    const admin = new Admin({ email, password });
+    await admin.save();
 
-    const token = jwt.sign({ adminId: newAdmin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(201).json({
-      message: 'Admin registered successfully',
-      token,
+    // Generate JWT token
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+
+    res.status(201).json({ token });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
-
-// Admin login
-exports.loginAdmin = async (req, res) => {
+// Login Admin
+const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Find admin by email
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const isPasswordValid = await admin.comparePassword(password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid password' });
+    // Compare passwords
+    const isMatch = await admin.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(200).json({
-      message: 'Admin logged in successfully',
-      token,
+    // Generate JWT token
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+
+    res.status(200).json({ token });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
+
+module.exports = { registerAdmin, loginAdmin };
