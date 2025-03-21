@@ -11,7 +11,7 @@ exports.saveProgress = async (req, res) => {
 
         if (progress) {
             // Update the existing progress
-            progress.lessons = lessons;
+            progress.lessons = lessons; // Ensure this includes the `rating` field
             progress.currentLessonIndex = currentLessonIndex;
             await progress.save();
         } else {
@@ -19,7 +19,7 @@ exports.saveProgress = async (req, res) => {
             progress = new Progres({
                 userId,
                 courseId,
-                lessons,
+                lessons, // Ensure this includes the `rating` field
                 currentLessonIndex
             });
             await progress.save();

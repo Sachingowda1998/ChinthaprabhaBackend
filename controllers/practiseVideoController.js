@@ -39,16 +39,18 @@ exports.uploadPractiseVideo = async (req, res) => {
 // Approve or reject practice video
 exports.approveRejectPractiseVideo = async (req, res) => {
   try {
-    const { status, rating } = req.body; // Add rating to the request body
+    const { status, rating } = req.body; // Ensure `rating` is included in the request
     const { id } = req.params;
 
+    // Validate status
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
+    // Update the PractiseVideo document
     const practiseVideo = await PractiseVideo.findByIdAndUpdate(
       id,
-      { status, rating }, // Update status and rating
+      { status, rating }, // Ensure `rating` is updated
       { new: true }
     );
 
@@ -77,11 +79,14 @@ exports.approveRejectPractiseVideo = async (req, res) => {
         } else {
           console.log('No next lesson found'); // Debugging
         }
+      } else {
+        console.log('Current lesson not found'); // Debugging
       }
     }
 
     res.status(200).json({ message: `Practice video ${status}`, practiseVideo });
   } catch (error) {
+    console.error('Error in approveRejectPractiseVideo:', error); // Debugging
     res.status(500).json({ message: 'Error updating practice video status', error: error.message });
   }
 };

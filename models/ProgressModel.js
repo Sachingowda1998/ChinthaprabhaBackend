@@ -10,7 +10,8 @@ const ProgressSchema = new mongoose.Schema({
             lessonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' },
             completed: { type: Boolean, default: false },
             videoUploaded: { type: Boolean, default: false },
-            videoApproved: { type: Boolean, default: false }
+            videoApproved: { type: Boolean, default: false },
+            rating: { type: Number, default: 0 } 
         }
     ],
     currentLessonIndex: { type: Number, default: 0 }
