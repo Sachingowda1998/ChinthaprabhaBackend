@@ -33,7 +33,7 @@ router.put('/user/update/:userId', upload.any(), UserController.updateUser);
 router.get('/users', UserController.getAllUsers);
 
 
-
+router.delete('/user/:userId', UserController.deleteUser);
 
 
 

@@ -28,5 +28,5 @@ router.get("/teacher/:id", teacherLoginController.getTeacherById);
 router.put("/teacher/:id", upload.single("image"), teacherLoginController.updateTeacherProfile);
 // Get all teachers
 router.get("/teachers", teacherLoginController.getAllTeachers);
-
+router.delete("/teacher/:id", teacherLoginController.deleteTeacher);
 module.exports = router;

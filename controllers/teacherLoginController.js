@@ -127,3 +127,17 @@ exports.getAllTeachers = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.deleteTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedTeacher = await TeacherLogin.findByIdAndDelete(id);
+    if (!deletedTeacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+    res.status(200).json({ message: "Teacher deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteTeacher:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
