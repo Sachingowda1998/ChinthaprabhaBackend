@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const LiveClass = require('../models/LiveClassModel');
 const Course = require('../models/CourseModel');
 const User = require('../models/UserModel');
+const notificationController = require('./notificationController');
 const TeacherLogin = require('../models/TeacherLogin'); // Adjust the path as needed
 // Create a new live class
 /* exports.createLiveClass = async (req, res) => {
@@ -99,12 +100,21 @@ exports.createLiveClass = async (req, res) => {
         });
 
         await liveClass.save();
-        res.status(201).json(liveClass);
+       // Create notifications for assigned users
+    if (users && users.length > 0) {
+        await notificationController.createLiveClassNotification(liveClass);
+      }
+  
+      res.status(201).json(liveClass);
     } catch (error) {
-        console.error('Error in createLiveClass:', error);
-        res.status(500).json({ message: "Server error", error: error.message });
+      console.error('Error in createLiveClass:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+  };
+
+
+
+
 
 
 // Get all live classes

@@ -63,7 +63,7 @@ const TeacherRoutes = require("./routes/TeacherRoutes")
 const allPerformerRoutes = require("./routes/allPerformerRoutes")
 const teacherLoginRoutes = require("./routes/teacherLoginRoutes")
 const liveClassRoutes = require("./routes/liveClassRoutes")
-
+const notificationRoutes = require('./routes/notificationRoutes');
 // Use Routes
 
 app.use("/chinthanaprabha/user-auth", userRoutes);
@@ -84,6 +84,7 @@ app.use("/chinthanaprabha/teacher", TeacherRoutes)
 app.use("/chinthanaprabha/allperformer", allPerformerRoutes)
 app.use("/chinthanaprabha/teacher-auth", teacherLoginRoutes)
 app.use("/chinthanaprabha/live", liveClassRoutes)
+app.use('/chinthanaprabha', notificationRoutes);
 // Define Port
 const PORT = process.env.PORT || 5000;
 
