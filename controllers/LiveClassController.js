@@ -84,8 +84,8 @@ exports.createLiveClass = async (req, res) => {
         }
 
         // Ensure the meetLink starts with https://
-        const formattedMeetLink = meetLink.startsWith('http://') || meetLink.startsWith('https://') 
-            ? meetLink 
+        const formattedMeetLink = meetLink.startsWith('http://') || meetLink.startsWith('https://')
+            ? meetLink
             : `https://${meetLink}`;
 
         // Create the live class
@@ -100,17 +100,17 @@ exports.createLiveClass = async (req, res) => {
         });
 
         await liveClass.save();
-       // Create notifications for assigned users
-    if (users && users.length > 0) {
-        await notificationController.createLiveClassNotification(liveClass);
-      }
-  
-      res.status(201).json(liveClass);
+        // Create notifications for assigned users
+        if (users && users.length > 0) {
+            await notificationController.createLiveClassNotification(liveClass);
+        }
+
+        res.status(201).json(liveClass);
     } catch (error) {
-      console.error('Error in createLiveClass:', error);
-      res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Error in createLiveClass:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-  };
+};
 
 
 
@@ -170,8 +170,8 @@ exports.updateLiveClass = async (req, res) => {
         }
 
         // Ensure the meetLink starts with https://
-        const formattedMeetLink = meetLink.startsWith('http://') || meetLink.startsWith('https://') 
-            ? meetLink 
+        const formattedMeetLink = meetLink.startsWith('http://') || meetLink.startsWith('https://')
+            ? meetLink
             : `https://${meetLink}`;
 
         // Update the live class
@@ -250,6 +250,70 @@ exports.getLiveClassesByTeacher = async (req, res) => {
         res.status(200).json(liveClasses);
     } catch (error) {
         console.error('Error fetching live classes:', error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+// Update a live class
+exports.updateLiveClass = async (req, res) => {
+    try {
+        const { title, course, teacher, startTime, endTime, meetLink, users } = req.body;
+
+        // Validate required fields
+        if (!title || !course || !teacher || !startTime || !endTime || !meetLink) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Validate if course and teacher are valid ObjectIds
+        if (!mongoose.Types.ObjectId.isValid(course) || !mongoose.Types.ObjectId.isValid(teacher)) {
+            return res.status(400).json({ message: "Invalid course or teacher ID" });
+        }
+
+        // Check if the course exists
+        const courseExists = await Course.findById(course);
+        if (!courseExists) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        // Check if the teacher exists
+        const teacherExists = await TeacherLogin.findById(teacher);
+        if (!teacherExists) {
+            return res.status(404).json({ message: "Teacher not found" });
+        }
+
+        // Ensure the meetLink starts with https://
+        const formattedMeetLink = meetLink.startsWith('http://') || meetLink.startsWith('https://')
+            ? meetLink
+            : `https://${meetLink}`;
+
+        // Update the live class
+        const liveClass = await LiveClass.findByIdAndUpdate(
+            req.params.id,
+            {
+                title,
+                course,
+                teacher,
+                startTime,
+                endTime,
+                meetLink: formattedMeetLink, // Use the formatted meetLink
+                users: users || [],
+            },
+            { new: true }
+        );
+
+        if (!liveClass) {
+            return res.status(404).json({ message: 'Live class not found' });
+        }
+
+        // Create notifications for assigned users when class is updated
+        if (users && users.length > 0) {
+            await notificationController.createLiveClassNotification(liveClass);
+        }
+
+        res.status(200).json(liveClass);
+    } catch (error) {
+        console.error('Error in updateLiveClass:', error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
