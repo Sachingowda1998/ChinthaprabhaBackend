@@ -64,6 +64,9 @@ const allPerformerRoutes = require("./routes/allPerformerRoutes")
 const teacherLoginRoutes = require("./routes/teacherLoginRoutes")
 const liveClassRoutes = require("./routes/liveClassRoutes")
 const notificationRoutes = require('./routes/notificationRoutes');
+const shopRoutes = require('./routes/shopRoutes');
+const instrumentRoutes = require("./routes/instrumentRoutes");
+const contactRoutes =require('./routes/contactRoutes.js') ;
 // Use Routes
 
 app.use("/chinthanaprabha/user-auth", userRoutes);
@@ -85,10 +88,13 @@ app.use("/chinthanaprabha/allperformer", allPerformerRoutes)
 app.use("/chinthanaprabha/teacher-auth", teacherLoginRoutes)
 app.use("/chinthanaprabha/live", liveClassRoutes)
 app.use('/chinthanaprabha', notificationRoutes);
-// Define Port
+app.use("/api/shop", shopRoutes);
+app.use("/api/instrument", instrumentRoutes);
+app.use("/api/contacts", contactRoutes);
+
+
 const PORT = process.env.PORT || 5000;
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:5000`);
 });
