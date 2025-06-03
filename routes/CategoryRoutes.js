@@ -1,12 +1,21 @@
-/* const express = require('express');
-const CategoryController = require('../controllers/CategoryController');
+const express = require("express");
 const router = express.Router();
+const { uploadConfigs } = require("../middleware/multer");
+const {
+  createCategory,
+  getAllCategories,
+  getCategoryById,
+  updateCategory,
+  deleteCategory,
+} = require("../controllers/CategoryController");
 
-// Category routes
-router.get("/categories", CategoryController.getAllCategories);
-router.get("/categories/:id", CategoryController.getCategoryById);
-router.post("/categories", CategoryController.createCategory);
-router.put("/categories/:id", CategoryController.updateCategory);
-router.delete("/categories/:id", CategoryController.deleteCategory);
+// Public routes
+router.get("/", getAllCategories);
+router.get("/:id", getCategoryById);
 
-module.exports = router; */
+// Admin routes (protected)
+router.post("/", uploadConfigs.categories.single("image"), createCategory);
+router.put("/:id", uploadConfigs.categories.single("image"), updateCategory);
+router.delete("/:id", deleteCategory);
+
+module.exports = router;
