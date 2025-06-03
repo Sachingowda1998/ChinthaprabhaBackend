@@ -4,7 +4,8 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet"); // Import Helmet
-const morgon = require('morgan')
+const morgon = require("morgan");
+const path = require("path");
 // Load environment variables from .env file
 dotenv.config();
 
@@ -14,7 +15,7 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Enable CORS for all routes 
+// Enable CORS for all routes
 app.use(cors());
 
 // Define the rate limiter
@@ -26,27 +27,33 @@ app.use(cors());
 
 // Apply the rate limiter to all requests
 // app.use(limiter);
-app.use(morgon('dev'))
+app.use(morgon("dev"));
 // Use Helmet for added security headers
-app.use(helmet({
+app.use(
+  helmet({
     contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-            "img-src": ["'self'", "data:", "http://localhost:3000", "http://localhost:3001"], // Allow images from self and front-end origin
-        }
+      useDefaults: true,
+      directives: {
+        "img-src": [
+          "'self'",
+          "data:",
+          "http://localhost:3000",
+          "http://localhost:3001",
+        ], // Allow images from self and front-end origin
+      },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow resources to be shared across origins
-}));
+  })
+);
 
-// Serve static files from the "uploads" directory 
+// Serve static files from the "uploads" directory
 app.use("/uploads", express.static("uploads"));
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // MongoDB Connection
 mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch((err) => console.log("Error: ", err));
-
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("Error: ", err));
 
 const userRoutes = require("./routes/UserRoutes");
 const CourseRoutes = require("./routes/CourseRoutes");
@@ -55,18 +62,18 @@ const PerformerOfTheWeekRoutes = require("./routes/PerformerOfTheWeekRoutes");
 const practiseVideo = require("./routes/practiseVideo");
 const paymentRoutes = require("./routes/paymentRoutes");
 /* const adminRoutes = require("./routes/adminRoutes"); */
-/* const CategoryRoutes = require("./routes/CategoryRoutes") */
+const CategoryRoutes = require("./routes/CategoryRoutes");
 
-const progress = require("./routes/progress")
-const adminRoutes = require("./routes/adminRoutes")
-const TeacherRoutes = require("./routes/TeacherRoutes")
-const allPerformerRoutes = require("./routes/allPerformerRoutes")
-const teacherLoginRoutes = require("./routes/teacherLoginRoutes")
-const liveClassRoutes = require("./routes/liveClassRoutes")
-const notificationRoutes = require('./routes/notificationRoutes');
-const shopRoutes = require('./routes/shopRoutes');
+const progress = require("./routes/progress");
+const adminRoutes = require("./routes/adminRoutes");
+const TeacherRoutes = require("./routes/TeacherRoutes");
+const allPerformerRoutes = require("./routes/allPerformerRoutes");
+const teacherLoginRoutes = require("./routes/teacherLoginRoutes");
+const liveClassRoutes = require("./routes/liveClassRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const shopRoutes = require("./routes/shopRoutes");
 const instrumentRoutes = require("./routes/instrumentRoutes");
-const contactRoutes =require('./routes/contactRoutes.js') ;
+const contactRoutes = require("./routes/contactRoutes.js");
 // Use Routes
 
 app.use("/chinthanaprabha/user-auth", userRoutes);
@@ -76,25 +83,25 @@ app.use("/chinthanaprabha/performer", PerformerOfTheWeekRoutes);
 app.use("/chinthanaprabha/practise", practiseVideo);
 app.use("/chinthanaprabha/payment-history", paymentRoutes);
 /* app.use("/chinthanaprabha/admin", adminRoutes) */
-/* app.use("/chinthanaprabha/category", CategoryRoutes) */
 
-app.use("/chinthanaprabha/progress-user", progress)
-app.use("/chinthanaprabha/admin-auth", adminRoutes)
+app.use("/chinthanaprabha/progress-user", progress);
+app.use("/chinthanaprabha/admin-auth", adminRoutes);
 
+app.use("/chinthanaprabha/teacher", TeacherRoutes);
 
-app.use("/chinthanaprabha/teacher", TeacherRoutes)
-
-app.use("/chinthanaprabha/allperformer", allPerformerRoutes)
-app.use("/chinthanaprabha/teacher-auth", teacherLoginRoutes)
-app.use("/chinthanaprabha/live", liveClassRoutes)
-app.use('/chinthanaprabha', notificationRoutes);
+app.use("/chinthanaprabha/allperformer", allPerformerRoutes);
+app.use("/chinthanaprabha/teacher-auth", teacherLoginRoutes);
+app.use("/chinthanaprabha/live", liveClassRoutes);
+app.use("/chinthanaprabha", notificationRoutes);
 app.use("/api/shop", shopRoutes);
 app.use("/api/instrument", instrumentRoutes);
 app.use("/api/contacts", contactRoutes);
 
-
+//musci-store routes
+app.use("/api/banners", require("./routes/bannerRoutes"));
+app.use("/api/category", CategoryRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:5000`);
+  console.log(`Server running on http://localhost:5000`);
 });
