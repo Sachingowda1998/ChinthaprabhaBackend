@@ -15,16 +15,6 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    subCategories: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-    trending: {
-      type: Boolean,
-      default: false,
-    },
     isActive: {
       type: Boolean,
       default: true,

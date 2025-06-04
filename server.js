@@ -74,6 +74,8 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const shopRoutes = require("./routes/shopRoutes");
 const instrumentRoutes = require("./routes/instrumentRoutes");
 const contactRoutes = require("./routes/contactRoutes.js");
+const SubcategoryRoutes = require("./routes/SubcategoryRoutes");
+const OrderRoutes = require("./routes/OrderRoutes");
 // Use Routes
 
 app.use("/chinthanaprabha/user-auth", userRoutes);
@@ -94,12 +96,17 @@ app.use("/chinthanaprabha/teacher-auth", teacherLoginRoutes);
 app.use("/chinthanaprabha/live", liveClassRoutes);
 app.use("/chinthanaprabha", notificationRoutes);
 app.use("/api/shop", shopRoutes);
-app.use("/api/instrument", instrumentRoutes);
+
 app.use("/api/contacts", contactRoutes);
+
 
 //musci-store routes
 app.use("/api/banners", require("./routes/bannerRoutes"));
 app.use("/api/category", CategoryRoutes);
+app.use("/api/subcategory", SubcategoryRoutes);
+app.use("/api/instrument", instrumentRoutes);
+app.use("/api/order", OrderRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

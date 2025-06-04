@@ -22,6 +22,10 @@ const dynamicStorage = multer.diskStorage({
       uploadPath = "./uploads/products/";
     } else if (route.includes("/categories")) {
       uploadPath = "./uploads/categories/";
+    } else if (route.includes("/subcategories")) {
+      uploadPath = "./uploads/subcategories/";
+    } else if (route.includes("/instruments")) {
+      uploadPath = "./uploads/instruments/";
     } else {
       uploadPath = "./uploads/misc/";
     }
@@ -133,6 +137,19 @@ const uploadConfigs = {
     allowedTypes: ["jpeg", "jpg", "png", "svg", "webp"],
     maxFiles: 1,
   }),
+  // subCategory image uploads
+  subcategories: createMulterConfig("subcategories", {
+    fileSize: 3 * 1024 * 1024, // 3MB
+    allowedTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+    maxFiles: 1,
+  }),
+
+  // Instrument image uploads
+  instruments: createMulterConfig("instruments", {
+    fileSize: 5 * 1024 * 1024, // 5MB
+    allowedTypes: ["jpeg", "jpg", "png", "webp"],
+    maxFiles: 1,
+  }),
 };
 
 // Method 4: Middleware factory with dynamic folder selection
@@ -233,4 +250,6 @@ module.exports = {
   bannerUpload: uploadConfigs.banners,
   productUpload: uploadConfigs.products,
   categoryUpload: uploadConfigs.categories,
+  subcategoryUpload: uploadConfigs.subcategories,
+  instrumentUpload: uploadConfigs.instruments,
 };
