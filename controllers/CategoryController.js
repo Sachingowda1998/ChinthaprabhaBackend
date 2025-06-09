@@ -1,5 +1,5 @@
 const Category = require("../models/CategoryModel");
-
+const SubCategory = require("../models/SubcategoryModel")
 // Create a new category
 exports.createCategory = async (req, res) => {
   try {
@@ -144,3 +144,4 @@ exports.deleteCategory = async (req, res) => {
     });
   }
 };
+
