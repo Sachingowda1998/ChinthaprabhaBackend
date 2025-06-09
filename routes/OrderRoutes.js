@@ -8,6 +8,9 @@ router.post("/", orderController.createOrder);
 // Get all orders
 router.get("/", orderController.getOrders);
 
+// Get order statistics
+router.get("/stats/overview", orderController.getOrderStats);
+
 // Get order by ID
 router.get("/:id", orderController.getOrderById);
 
