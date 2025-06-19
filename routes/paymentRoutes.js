@@ -1,39 +1,37 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const paymentController = require('../controllers/paymentController');
+const paymentController = require("../controllers/paymentController");
 
-// Store purchased course
-router.post('/store-purchased-course', paymentController.storePurchasedCourse);
+// Test route
+router.get("/test", (req, res) => {
+  res.json({
+    message: "Payment routes are working!",
+    timestamp: new Date().toISOString(),
+  });
+});
 
-// Get purchased courses for a user
-router.get('/purchased-courses/:userId', paymentController.getPurchasedCourses);
+// Calculate payment breakdown
+router.get("/calculate/:courseId", paymentController.calculatePaymentBreakdown);
 
+// Process enhanced payment
+router.post("/process", paymentController.processPayment);
 
+// Get enhanced payment history for a user
+router.get("/history/:userId", paymentController.getPaymentHistory);
 
+// Get purchased courses with enhanced payment details
+router.get("/purchased-courses/:userId", paymentController.getPurchasedCourses);
 
-
-
-
-
-
-// Create a new payment
-router.post('/payments', paymentController.createPayment);
+// Generate enhanced payment report
+router.get("/report", paymentController.generatePaymentReport);
 
 // Get all payments
-router.get('/payments', paymentController.getAllPayments);
-
-// Get payments by status
-router.get('/payments/status/:status', paymentController.getPaymentsByStatus);
-
-// Generate payment report
-router.get('/payments/report', paymentController.generatePaymentReport);
+router.get("/payments", paymentController.getAllPayments);
 
 // Update payment status
-router.put('/payments/status', paymentController.updatePaymentStatus);
+router.put("/status/:paymentId", paymentController.updatePaymentStatus);
 
-
-
-
-router.get('/payments/user/:userId', paymentController.getUserPaymentHistory);
+// Update payment details
+router.put("/:paymentId", paymentController.updatePaymentDetails);
 
 module.exports = router;

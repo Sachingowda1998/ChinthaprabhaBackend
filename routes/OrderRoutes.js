@@ -23,7 +23,7 @@
 // module.exports = router;
 
 
-const express = require('express');
+/* const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/OrderController');
 
@@ -42,4 +42,29 @@ router.put('/:id', orderController.updateOrder);
 // DELETE order
 router.delete('/:id', orderController.deleteOrder);
 
-module.exports = router;
+module.exports = router; */
+
+
+const express = require("express")
+const router = express.Router()
+const orderController = require("../controllers/OrderController")
+
+// CREATE Order
+router.post("/", orderController.createOrder)
+
+// GET all orders (with filtering and pagination)
+router.get("/", orderController.getOrders)
+
+// GET order statistics
+router.get("/stats/overview", orderController.getOrderStats)
+
+// GET order by ID
+router.get("/:id", orderController.getOrderById)
+
+// UPDATE order (status, tracking, cancellation, payment status, etc.)
+router.put("/:id", orderController.updateOrder)
+
+// DELETE order
+router.delete("/:id", orderController.deleteOrder)
+
+module.exports = router
