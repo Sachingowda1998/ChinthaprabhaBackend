@@ -16,3 +16,5 @@ module.exports = router;
     "email": "bikash3@gmail.com",
     "password": "dev1@1234"
   } */
+
+   /*  mongodb+srv://parnetstech11:Zmerj3BcANm3C0Qe@cluster0.4qiae.mongodb.net/chinthanaprabha */
