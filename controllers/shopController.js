@@ -1,3 +1,5 @@
+const { uploadFile2 } = require('../middleware/aws');
+
 const ShopItem = require('../models/ShopItem');
 const path = require('path');
 
@@ -5,7 +7,7 @@ const path = require('path');
 exports.createItem = async (req, res) => {
   try {
     const { name, category, price, rating, description } = req.body;
-    const image = req.file ? `/uploads/shop/${req.file.filename}` : null;
+    const image = req.file ? `${req.file ? await uploadFile2(req.file, "category") : null}` : null;
 
     const newItem = new ShopItem({ name, category, price, rating, description, image });
     await newItem.save();
@@ -59,7 +61,7 @@ exports.updateItem = async (req, res) => {
       price: price || existingItem.price,
       rating: rating !== undefined ? rating : existingItem.rating,
       description: description || existingItem.description,
-      image: req.file ? `/uploads/shop/${req.file.filename}` : existingItem.image,
+      image: req.file ? `${req.file ? await uploadFile2(req.file, "category") : null}` : existingItem.image,
     };
 
     const updatedItem = await ShopItem.findByIdAndUpdate(itemId, updatedData, { new: true });

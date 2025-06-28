@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const instrumentController = require("../controllers/instrumentController");
-const { instrumentUpload } = require("../middleware/multer");
+//const { instrumentUpload } = require("../middleware/multer");
 
+
+const multer = require("multer");
+
+const instrumentUpload = multer({})
 
 // Routes
 router.post("/", instrumentUpload.single("image"), instrumentController.createInstrument);

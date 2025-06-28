@@ -1,3 +1,5 @@
+const { uploadFile2 } = require('../middleware/aws');
+
 const Subcategory = require("../models/SubcategoryModel");
 const Category = require("../models/CategoryModel");
 
@@ -28,7 +30,7 @@ exports.createSubcategory = async (req, res) => {
       name,
       description,
       category: categoryId,
-      image: `/uploads/subcategories/${req.file.filename}`,
+      image: `${req.file ? await uploadFile2(req.file, "category") : null}`,
     });
 
     await subcategory.save();
@@ -139,7 +141,7 @@ exports.updateSubcategory = async (req, res) => {
 
     // If new image is uploaded
     if (req.file) {
-      updateData.image = `/uploads/subcategories/${req.file.filename}`;
+      updateData.image = `${req.file ? await uploadFile2(req.file, "category") : null}`;
     }
 
     const subcategory = await Subcategory.findByIdAndUpdate(

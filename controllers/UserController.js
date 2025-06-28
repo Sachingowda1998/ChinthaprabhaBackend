@@ -1,3 +1,5 @@
+const { uploadFile2 } = require('../middleware/aws');
+
 const User = require("../models/UserModel")
 const jwt = require("jsonwebtoken")
 const mongoose = require("mongoose") // Added missing mongoose import
@@ -208,12 +210,11 @@ exports.updateUser = async (req, res) => {
   const { name, email, mobile, fcmToken } = req.body
 
   console.log("Request Body:", req.body)
-  console.log("Request File:", req.files)
+  console.log("Request File:", req.file) // Changed from req.files to req.file
 
   try {
     // Validate mobile number format (simple validation using RegEx)
     if (mobile && !/^\d{10}$/.test(mobile)) {
-      // Check if mobile number is 10 digits
       return res.status(400).json({ message: "Invalid mobile number format. Please enter a 10-digit mobile number." })
     }
 
@@ -245,11 +246,16 @@ exports.updateUser = async (req, res) => {
     if (mobile) updateData.mobile = mobile
     if (fcmToken) updateData.fcmToken = fcmToken
 
-    // Handle profile picture update
-    if (req.files && req.files.length > 0) {
-      const profilePictureFile = req.files.find((file) => file.fieldname === "profilePicture")
-      if (profilePictureFile) {
-        updateData.image = profilePictureFile.filename
+    // Handle profile picture update - FIXED
+    if (req.file) {
+      try {
+        console.log("Uploading file:", req.file)
+        const profilePictureUrl = await uploadFile2(req.file, "profile-pictures")
+        console.log("Upload successful, URL:", profilePictureUrl)
+        updateData.image = profilePictureUrl
+      } catch (uploadError) {
+        console.error("Error uploading profile picture to AWS:", uploadError)
+        return res.status(500).json({ message: "Error uploading profile picture to AWS" })
       }
     }
 
@@ -260,13 +266,15 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" })
     }
 
+    console.log("Updated user:", user) // Debug log
+
     res.status(200).json({
       message: "User details updated successfully",
       userId: user._id,
       name: user.name,
       email: user.email,
       mobile: user.mobile,
-      image: user.image,
+      image: user.image, // This should now contain the correct image URL
       fcmToken: user.fcmToken,
     })
   } catch (error) {

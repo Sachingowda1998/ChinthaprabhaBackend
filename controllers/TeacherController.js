@@ -1,4 +1,5 @@
 // controllers/TeacherController.js
+const { uploadFile2 } = require('../middleware/aws');
 const Teacher = require("../models/TeacherModel");
 const upload = require("../middleware/multerConfig"); // Import the upload middleware
 
@@ -6,8 +7,8 @@ const upload = require("../middleware/multerConfig"); // Import the upload middl
 const createTeacher = async (req, res) => {
     try {
         const { subject, name } = req.body;
-        const subjectImage = req.files['subjectImage'][0].path; // Path to the uploaded image
-        const videoUrl = req.files['videoUrl'][0].path; // Path to the uploaded video
+        const subjectImage = req.files['subjectImage'] ? await uploadFile2(req.files['subjectImage'][0], "category") : undefined;
+        const videoUrl = req.files['videoUrl'] ? await uploadFile2(req.files['videoUrl'][0], "category") : undefined;
 
         const newTeacher = new Teacher({
             subject,
@@ -50,8 +51,9 @@ const getTeacherById = async (req, res) => {
 const updateTeacher = async (req, res) => {
     try {
         const { subject, name } = req.body;
-        const subjectImage = req.files['subjectImage'] ? req.files['subjectImage'][0].path : undefined;
-        const videoUrl = req.files['videoUrl'] ? req.files['videoUrl'][0].path : undefined;
+          const subjectImage = req.files['subjectImage'] ? await uploadFile2(req.files['subjectImage'][0], "category") : undefined;
+        const videoUrl = req.files['videoUrl'] ? await uploadFile2(req.files['videoUrl'][0], "category") : undefined;
+
 
         const updatedTeacher = await Teacher.findByIdAndUpdate(
             req.params.id,

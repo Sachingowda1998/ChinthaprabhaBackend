@@ -14,6 +14,13 @@ const categorySchema = new mongoose.Schema(
     image: {
       type: String,
       required: true,
+      validate: {
+        validator: function(v) {
+          // Validate that it's a proper URL
+          return /^https?:\/\/.+/.test(v);
+        },
+        message: 'Image must be a valid URL'
+      }
     },
     isActive: {
       type: Boolean,

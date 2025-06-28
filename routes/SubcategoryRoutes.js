@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { subcategoryUpload } = require("../middleware/multer");
+//const { subcategoryUpload } = require("../middleware/multer");
 const {
   createSubcategory,
   getAllSubcategories,
@@ -9,6 +9,10 @@ const {
   updateSubcategory,
   deleteSubcategory,
 } = require("../controllers/SubcategoryController");
+
+const multer = require("multer");
+
+const subcategoryUpload = multer({})
 
 // Public routes
 router.get("/", getAllSubcategories);

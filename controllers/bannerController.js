@@ -1,3 +1,4 @@
+const { uploadFile2 } = require('../middleware/aws');
 const Banner = require("../models/Banner");
 const upload = require("../middleware/multer"); // Use your existing multer middleware
 const path = require("path");
@@ -116,7 +117,7 @@ const createBanner = async (req, res) => {
 
     // If image was uploaded, use the file path
     if (req.file) {
-      bannerData.image = `/uploads/banners/${req.file.filename}`;
+      bannerData.image = `${req.file ? await uploadFile2(req.file, "category") : null}`;
     }
 
     const banner = await Banner.create(bannerData);
@@ -166,7 +167,7 @@ const updateBanner = async (req, res) => {
           if (err) console.error("Error deleting old image:", err);
         });
       }
-      updateData.image = `/uploads/banners/${req.file.filename}`;
+      updateData.image = `${req.file ? await uploadFile2(req.file, "category") : null}`;
     }
 
     const updatedBanner = await Banner.findByIdAndUpdate(

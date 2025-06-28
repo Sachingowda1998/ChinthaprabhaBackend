@@ -3,16 +3,21 @@ const router = express.Router()
 const UserController = require("../controllers/UserController")
 const multer = require("multer")
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/profile")
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "_" + file.originalname)
-    },
+// Configure multer for memory storage (better for cloud uploads)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Only allow image files
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true)
+    } else {
+      cb(new Error("Only image files are allowed"), false)
+    }
+  },
 })
-
-const upload = multer({ storage: storage })
 
 // Registration route
 router.post("/register", UserController.register)
@@ -26,8 +31,8 @@ router.get("/user/:userId", UserController.getUserDetails)
 // OTP Verification route
 router.post("/verify-otp", UserController.verifyOTP)
 
-// Update user
-router.put("/user/update/:userId", upload.any(), UserController.updateUser)
+// Update user - FIXED: Use single file upload
+router.put("/user/update/:userId", upload.single("profilePicture"), UserController.updateUser)
 
 // Get all users route
 router.get("/users", UserController.getAllUsers)

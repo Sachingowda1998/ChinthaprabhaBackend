@@ -1,4 +1,5 @@
 // routes/bannerRoutes.js
+
 const express = require("express");
 const {
   upload,
@@ -12,8 +13,11 @@ const {
   getBannerStats,
 } = require("../controllers/bannerController");
 
-const { bannerUpload } = require("../middleware/multer");
+// const { bannerUpload } = require("../middleware/multer");
 
+const multer = require("multer");
+
+const bannerUpload = multer({})
 const router = express.Router();
 
 // routes

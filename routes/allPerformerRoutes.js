@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage });
+const upload = multer();
 
 // Upload performer
 router.post('/upload', upload.single('video'), allPerformerController.createAllPerformer);

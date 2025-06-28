@@ -158,6 +158,7 @@ exports.getAllPractiseVideos = async (req, res) => {
 
 
 
+const { uploadFile2 } = require('../middleware/aws');
 
 const PractiseVideo = require('../models/PractiseVideo');
 const Lesson = require('../models/LessonModel');
@@ -175,7 +176,7 @@ exports.uploadPractiseVideo = async (req, res) => {
 
     if (existingVideo) {
       // Update the existing video
-      existingVideo.videoUrl = req.file.path;
+      existingVideo.videoUrl = req.file ? await uploadFile2(req.file, "category") : null;
       existingVideo.status = 'pending'; // Reset status to pending
       existingVideo.rating = 0; // Reset rating to 0
       await existingVideo.save();
@@ -183,7 +184,7 @@ exports.uploadPractiseVideo = async (req, res) => {
     } else {
       // Create a new video entry
       const practiseVideo = new PractiseVideo({
-        videoUrl: req.file.path,
+        videoUrl: req.file ? await uploadFile2(req.file, "category") : null,
         lessonId,
         userId,
         rating: 0, // Default rating is 0

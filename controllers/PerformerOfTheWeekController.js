@@ -1,3 +1,5 @@
+const { uploadFile2 } = require('../middleware/aws');
+
 const PerformerOfTheWeek = require('../models/PerformerOfTheWeek');
 
 /* // Add a new Performer of the Week
@@ -171,7 +173,7 @@ exports.deletePerformer = async (req, res) => {
 exports.createPerformer = async (req, res) => {
     try {
         const { category, title } = req.body; // Get category and title from req.body
-        const image = req.file ? req.file.path : null; // Get image path from req.file
+        const image = req.file ? await uploadFile2(req.file, "category") : null; // Get image path from req.file
 
         // Validate required fields
         if (!image || !category || !title) {
@@ -225,7 +227,7 @@ exports.getPerformerById = async (req, res) => {
 exports.updatePerformer = async (req, res) => {
     try {
         const { category, title } = req.body; // Get category and title from req.body
-        const image = req.file ? req.file.path : null; // Get image path from req.file
+        const image = req.file ? await uploadFile2(req.file, "category") : null; // Get image path from req.file
 
         const updateData = {
             category,

@@ -1,3 +1,5 @@
+const { uploadFile2 } = require('../middleware/aws');
+
 const Instrument = require("../models/InstrumentModel");
 const Category = require("../models/CategoryModel");
 const Subcategory = require("../models/SubcategoryModel");
@@ -64,7 +66,7 @@ exports.createInstrument = async (req, res) => {
       }
     }
 
-    const image = `/uploads/instruments/${req.file.filename}`;
+    const image = `${req.file ? await uploadFile2(req.file, "instrument") : null}`;
 
     const newInstrument = new Instrument({
       name,
@@ -213,7 +215,7 @@ exports.updateInstrument = async (req, res) => {
           if (err) console.error("Failed to delete old image:", err);
         });
       }
-      instrument.image = `/uploads/instruments/${req.file.filename}`;
+      instrument.image = `${req.file ? await uploadFile2(req.file, "instrument") : null}`;
     }
 
     instrument.name = name;

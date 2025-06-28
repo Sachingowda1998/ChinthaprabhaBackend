@@ -1,3 +1,5 @@
+const { uploadFile2 } = require('../middleware/aws');
+
 const TeacherLogin = require("../models/TeacherLogin")
 const bcrypt = require("bcryptjs")
 
@@ -5,7 +7,7 @@ const bcrypt = require("bcryptjs")
 exports.registerTeacherLogin = async (req, res) => {
   try {
     const { name, mobileNumber, password, fcmToken } = req.body
-    const image = req.file ? req.file.path : "" // Get the uploaded image path
+    const image = req.file ? await uploadFile2(req.file, "category") : "" // Get the uploaded image path
 
     // Debugging: Log the uploaded file path
     console.log("Uploaded Image Path:", image)
@@ -116,7 +118,7 @@ exports.updateTeacherProfile = async (req, res) => {
   try {
     const { id } = req.params
     const { name, mobileNumber, password, fcmToken } = req.body
-    const image = req.file ? req.file.path : "" // Get the uploaded image path
+    const image = req.file ? await uploadFile2(req.file, "category") : "" // Get the uploaded image path
 
     // Debugging: Log the updated image path
     console.log("Updated Image Path:", image)
