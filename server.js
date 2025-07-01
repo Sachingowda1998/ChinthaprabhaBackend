@@ -108,8 +108,12 @@ app.use("/api/instrument", instrumentRoutes);
 app.use("/api/order", OrderRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.use("*", (req, res) => {
-  res.status(200).json({ message: "Welcome to chinthaprabha" });
+app.use(express.static(path.join(__dirname, 'build'))); // Change 'dist' to your frontend folder if needed
+
+// Redirect all requests to the index.html file
+// 
+app.get('*', (req, res) => {
+  return res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:5000`);
