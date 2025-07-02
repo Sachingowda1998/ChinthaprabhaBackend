@@ -29,7 +29,7 @@ app.use(cors());
 // app.use(limiter);
 app.use(morgon("dev"));
 // Use Helmet for added security headers
-app.use(
+/* app.use(
   helmet({
     contentSecurityPolicy: {
       useDefaults: true,
@@ -39,12 +39,12 @@ app.use(
           "data:",
           "http://localhost:3000",
           "http://localhost:3001",
-        ], // Allow images from self and front-end origin
+        ], 
       },
     },
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow resources to be shared across origins
+    crossOriginResourcePolicy: { policy: "cross-origin" }, 
   })
-);
+); */
 
 // Serve static files from the "uploads" directory
 // app.use("/uploads", express.static("uploads"));
