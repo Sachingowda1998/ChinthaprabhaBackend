@@ -1,4 +1,4 @@
-const { uploadFile2 } = require('../middleware/aws');
+const { uploadFile2 } = require("../middleware/aws")
 
 const TeacherLogin = require("../models/TeacherLogin")
 const bcrypt = require("bcryptjs")
@@ -137,12 +137,12 @@ exports.updateTeacherProfile = async (req, res) => {
       teacher.fcmToken = fcmToken
     }
 
-    // If password is provided, hash it before saving
+    // FIXED: Only set password if provided - let the pre-save middleware handle hashing
     if (password) {
-      teacher.password = await bcrypt.hash(password, 10)
+      teacher.password = password // Don't hash here, let the pre-save middleware do it
     }
 
-    // Save the updated teacher
+    // Save the updated teacher (pre-save middleware will hash password if modified)
     await teacher.save()
 
     // Debugging: Log the updated teacher
