@@ -76,6 +76,7 @@ const instrumentRoutes = require("./routes/instrumentRoutes");
 const contactRoutes = require("./routes/contactRoutes.js");
 const SubcategoryRoutes = require("./routes/SubcategoryRoutes");
 const OrderRoutes = require("./routes/OrderRoutes");
+const performerRoutes = require("./routes/performerRoutes");
 // Use Routes
 
 app.use("/chinthanaprabha/user-auth", userRoutes);
@@ -106,6 +107,7 @@ app.use("/api/category", CategoryRoutes);
 app.use("/api/subcategory", SubcategoryRoutes);
 app.use("/api/instrument", instrumentRoutes);
 app.use("/api/order", OrderRoutes);
+app.use("/chinthanaprabha/performers", performerRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.use(express.static(path.join(__dirname, 'build'))); // Change 'dist' to your frontend folder if needed
