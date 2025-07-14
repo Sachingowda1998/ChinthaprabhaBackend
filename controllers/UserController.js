@@ -1,8 +1,41 @@
-const { uploadFile2 } = require('../middleware/aws');
-
+const { uploadFile2 } = require("../middleware/aws")
 const User = require("../models/UserModel")
+const WalletTransaction = require("../models/WalletTransactionModel") // Add this import
 const jwt = require("jsonwebtoken")
-const mongoose = require("mongoose") // Added missing mongoose import
+const mongoose = require("mongoose")
+
+// Helper to generate a professional-looking referral code
+const generateReferralCode = async (name) => {
+  const sanitizedName = name ? name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() : ""
+  let base = sanitizedName.substring(0, Math.min(sanitizedName.length, 5)) // Take first 5 chars of sanitized name
+  if (base.length === 0) {
+    base = "USER" // Fallback if name is empty or only special chars
+  }
+
+  let newReferralCode
+  let isUnique = false
+  let counter = 0
+  while (!isUnique && counter < 100) {
+    // Limit attempts to prevent infinite loops
+    const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase() // 5 random alphanumeric chars
+    newReferralCode = `${base}${randomSuffix}`.substring(0, 10) // Ensure max length, e.g., 10 characters
+
+    // Check if the generated code already exists in the database
+    const existingCode = await User.findOne({ referralCode: newReferralCode })
+    if (!existingCode) {
+      isUnique = true
+    }
+    counter++
+  }
+
+  if (!isUnique) {
+    // Fallback to a purely random code if name-based generation fails after many attempts
+    console.warn("Could not generate unique name-based referral code, falling back to random.")
+    return Math.random().toString(36).substring(2, 12).toUpperCase() // 10 random chars
+  }
+
+  return newReferralCode
+}
 
 // Generate a fixed dummy OTP for testing (instead of a random one)
 function generateOTP() {
@@ -11,7 +44,7 @@ function generateOTP() {
 
 // Registration controller
 exports.register = async (req, res) => {
-  const { name, email, mobile, fcmToken } = req.body
+  const { name, email, mobile, fcmToken, referredBy } = req.body
 
   try {
     // Check if the user already exists by mobile
@@ -32,12 +65,19 @@ exports.register = async (req, res) => {
     // Set OTP expiration time (e.g., 10 minutes)
     const otpExpiration = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
 
-    // Create and save a new user (with FCM token if provided)
+    // Generate a unique referral code for the new user
+    let newReferralCode
+    // Change this line:
+    newReferralCode = await generateReferralCode(name) // Pass the user's name
+
+    // Create and save a new user (with FCM token and referral info if provided)
     const user = new User({
       name,
       email,
       mobile,
       fcmToken: fcmToken || null,
+      referralCode: newReferralCode, // Assign the generated referral code
+      referredBy: referredBy || null, // Store the referrer's code if provided
     })
     await user.save()
 
@@ -54,6 +94,7 @@ exports.register = async (req, res) => {
       userId: user._id,
       name: user.name,
       email: user.email,
+      referralCode: user.referralCode, // Include the new user's referral code
     })
   } catch (error) {
     console.error(error)
@@ -183,6 +224,7 @@ exports.getUserDetails = async (req, res) => {
   }
 
   try {
+    // Include referralCode, referredBy, and walletBalance in the select statement
     const user = await User.findById(userId).select("-password -otp")
 
     if (!user) {
@@ -197,6 +239,9 @@ exports.getUserDetails = async (req, res) => {
       mobile: user.mobile,
       image: user.image,
       fcmToken: user.fcmToken,
+      referralCode: user.referralCode, // Include referral code
+      referredBy: user.referredBy, // Include referred by
+      walletBalance: user.walletBalance, // Include wallet balance
     })
   } catch (error) {
     console.error(error)
@@ -276,6 +321,9 @@ exports.updateUser = async (req, res) => {
       mobile: user.mobile,
       image: user.image, // This should now contain the correct image URL
       fcmToken: user.fcmToken,
+      referralCode: user.referralCode,
+      referredBy: user.referredBy,
+      walletBalance: user.walletBalance,
     })
   } catch (error) {
     console.error("Error updating user:", error)
@@ -317,5 +365,135 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     console.error("Error deleting user:", error)
     res.status(500).json({ message: "Error deleting user" })
+  }
+}
+
+// New: Helper function to credit user's wallet (for internal use)
+exports.creditUserWallet = async (userId, amount, description, relatedEntity = null, relatedModel = null) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid User ID for wallet credit")
+  }
+  if (typeof amount !== "number" || amount <= 0) {
+    throw new Error("Invalid amount. Must be a positive number.")
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $inc: { walletBalance: amount } }, // Increment wallet balance
+      { new: true }, // Return the updated document
+    )
+
+    if (!user) {
+      throw new Error("User not found for wallet credit")
+    }
+
+    // Record the transaction
+    const transaction = new WalletTransaction({
+      userId,
+      type: "credit",
+      amount,
+      description: description || "Wallet credit",
+      relatedEntity,
+      relatedModel,
+    })
+    await transaction.save()
+
+    console.log(`Wallet credited by ${amount} for user ${userId}. New balance: ${user.walletBalance}`)
+    return user
+  } catch (error) {
+    console.error("Error crediting user wallet internally:", error)
+    throw error // Re-throw to be caught by the calling function
+  }
+}
+
+// New: Get user's wallet balance (controller for API route)
+exports.getWalletBalance = async (req, res) => {
+  const { userId } = req.params
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid User ID" })
+  }
+
+  try {
+    const user = await User.findById(userId).select("walletBalance")
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+    res.status(200).json({
+      message: "Wallet balance fetched successfully",
+      walletBalance: user.walletBalance,
+    })
+  } catch (error) {
+    console.error("Error fetching wallet balance:", error)
+    res.status(500).json({ message: "Error fetching wallet balance" })
+  }
+}
+
+// New: Credit user's wallet (controller for API route)
+exports.creditWallet = async (req, res) => {
+  const { userId } = req.params
+  const { amount } = req.body
+
+  try {
+    const updatedUser = await exports.creditUserWallet(userId, amount) // Use the internal helper
+    res.status(200).json({
+      message: `Wallet credited by ${amount}. New balance: ${updatedUser.walletBalance}`,
+      walletBalance: updatedUser.walletBalance,
+    })
+  } catch (error) {
+    console.error("Error crediting wallet via API:", error)
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// New: Get user's wallet transaction history
+exports.getWalletHistory = async (req, res) => {
+  const { userId } = req.params
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid User ID" })
+  }
+
+  try {
+    const transactions = await WalletTransaction.find({ userId }).sort({ transactionDate: -1 }).lean() // Use .lean() for faster queries if not modifying documents
+
+    if (!transactions || transactions.length === 0) {
+      return res.status(200).json({ message: "No wallet transactions found for this user.", history: [] })
+    }
+
+    res.status(200).json({
+      message: "Wallet history fetched successfully",
+      history: transactions,
+    })
+  } catch (error) {
+    console.error("Error fetching wallet history:", error)
+    res.status(500).json({ message: "Error fetching wallet history" })
+  }
+}
+
+
+// New: Get referral earnings for admin panel
+exports.getReferralEarnings = async (req, res) => {
+  try {
+    const referralTransactions = await WalletTransaction.find({
+      type: "credit",
+      description: { $regex: "Referral bonus", $options: "i" }, // Case-insensitive search for "Referral bonus"
+    })
+      .populate("userId", "name email mobile") // Populate referrer details
+      .populate("relatedEntity", "name email mobile") // Populate referred user details
+      .sort({ transactionDate: -1 })
+      .lean()
+
+    // Filter out transactions where userId or relatedEntity might not be found (e.g., deleted users)
+    const filteredTransactions = referralTransactions.filter((t) => t.userId && t.relatedEntity)
+
+    res.status(200).json({
+      message: "Referral earnings fetched successfully",
+      earnings: filteredTransactions,
+    })
+  } catch (error) {
+    console.error("Error fetching referral earnings:", error)
+    res.status(500).json({ message: "Error fetching referral earnings" })
   }
 }

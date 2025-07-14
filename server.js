@@ -8,6 +8,7 @@ const morgon = require("morgan")
 const path = require("path")
 const http = require("http") // Import http module
 const { Server } = require("socket.io") // Import Server from socket.io
+const { sendChatMessageNotification } = require("./controllers/notificationController")
 
 // Load environment variables from .env file
 dotenv.config()
@@ -143,6 +144,16 @@ io.on("connection", (socket) => {
       const roomName = messageData.roomName
       io.to(roomName).emit("receiveMessage", messageToEmit)
       console.log(`Message sent to room ${roomName}:`, messageToEmit.message)
+
+      // Call the new notification function after saving and emitting the message
+      await sendChatMessageNotification({
+        senderId: messageData.senderId,
+        receiverId: messageData.receiverId,
+        courseId: messageData.courseId,
+        messageContent: messageData.message,
+        senderModel: messageData.senderModel,
+        receiverModel: messageData.receiverModel,
+      })
     } catch (error) {
       console.error("Error saving or emitting message:", error)
       socket.emit("messageError", { message: "Failed to send message" })

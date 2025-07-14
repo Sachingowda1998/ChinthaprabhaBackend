@@ -1,7 +1,12 @@
 const Payment = require("../models/Payment")
 const Course = require("../models/CourseModel")
-const User = require("../models/UserModel")
+const User = require("../models/UserModel") // Import the User model
 const Offer = require("../models/OfferModel") // Import the Offer model
+const { creditUserWallet } = require("../controllers/UserController") // Import the new helper function
+const WalletTransaction = require("../models/WalletTransactionModel") // Add this import
+
+// Define the referral reward amount
+const REFERRAL_REWARD_AMOUNT = 100 // Example: ₹100
 
 // Helper function to validate and apply coupon
 const applyCoupon = async (couponCode, baseAmount) => {
@@ -199,14 +204,89 @@ exports.processPayment = async (req, res) => {
       discountApplied: discountAmount, // Store applied discount amount
     })
 
+    // --- New: Handle Wallet Payment ---
+    if (paymentMethod === "wallet") {
+      const user = await User.findById(userId)
+      if (!user) {
+        return res.status(404).json({ message: "User not found for wallet payment." })
+      }
+
+      if (user.walletBalance < totalAmount) {
+        return res.status(400).json({ message: "Insufficient wallet balance." })
+      }
+
+      // Deduct amount from wallet
+      user.walletBalance -= totalAmount
+      await user.save()
+
+      // Set payment status to completed for wallet payments
+      payment.status = "completed"
+      // Ensure paymentDetails for wallet is recorded
+      payment.paymentDetails = { walletType: paymentDetails.walletType || "Internal Wallet" }
+      console.log(`Wallet payment successful for user ${userId}. New balance: ${user.walletBalance}`)
+    }
+    // --- End New: Handle Wallet Payment ---
+
     const savedPayment = await payment.save()
     console.log("Payment saved successfully:", savedPayment.transactionId)
+
+    // Record debit transaction for wallet payment if it was used
+    if (paymentMethod === "wallet") {
+      const debitTransaction = new WalletTransaction({
+        userId,
+        type: "debit",
+        amount: totalAmount,
+        description: `Course purchase: ${course.name}`,
+        relatedEntity: savedPayment._id, // Link to the payment record
+        relatedModel: "Payment",
+      })
+      await debitTransaction.save()
+    }
 
     // Increment usage count for the applied offer
     if (offerId) {
       await Offer.findByIdAndUpdate(offerId, { $inc: { usedCount: 1 } })
       console.log(`Offer ${couponCodeApplied} usage count incremented.`)
     }
+
+    // --- Referral Earning Logic ---
+    try {
+      const purchaser = await User.findById(userId)
+      if (purchaser && purchaser.referredBy) {
+        // Check if this is the first purchase by the referred user
+        const previousPurchases = await Payment.countDocuments({
+          userId: purchaser._id,
+          status: "completed",
+          _id: { $ne: savedPayment._id }, // Exclude the current payment
+        })
+
+        if (previousPurchases === 0) {
+          // This is the referred user's first completed purchase
+          const referrer = await User.findOne({ referralCode: purchaser.referredBy })
+
+          if (referrer) {
+            await creditUserWallet(
+              referrer._id,
+              REFERRAL_REWARD_AMOUNT,
+              `Referral bonus for ${purchaser.name}'s first purchase`,
+              purchaser._id, // Link to the referred user
+              "User",
+            )
+            console.log(
+              `Referral reward of ₹${REFERRAL_REWARD_AMOUNT} credited to ${referrer.name} (ID: ${referrer._id}) for referring ${purchaser.name}.`,
+            )
+          } else {
+            console.log(`Referrer with code ${purchaser.referredBy} not found.`)
+          }
+        } else {
+          console.log(`User ${purchaser.name} has made previous purchases, no referral reward for this transaction.`)
+        }
+      }
+    } catch (referralError) {
+      console.error("Error processing referral reward:", referralError)
+      // Do not block the main payment process if referral fails
+    }
+    // --- End Referral Earning Logic ---
 
     const responsePayment = savedPayment.toObject()
 

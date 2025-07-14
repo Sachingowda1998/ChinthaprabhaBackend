@@ -43,4 +43,14 @@ router.delete("/user/:userId", UserController.deleteUser)
 // Update FCM token
 router.put("/user/:userId/fcm-token", UserController.updateFcmToken)
 
+// New: Get user's wallet balance
+router.get("/user/:userId/wallet", UserController.getWalletBalance)
+
+// New: Credit user's wallet (internal API, secure appropriately)
+router.post("/user/:userId/credit-wallet", UserController.creditWallet)
+router.get("/user/:userId/wallet-history", UserController.getWalletHistory)
+
+// New: Get referral earnings for admin panel
+router.get("/admin/referral-earnings", UserController.getReferralEarnings)
+
 module.exports = router
