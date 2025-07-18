@@ -13,6 +13,10 @@ const TeacherSchema = new mongoose.Schema({
         type: String, // Path to the image file
         required: true,
     },
+    thumbnail: {
+        type: String, // Path to the thumbnail image file for video
+        required: true,
+    },
     videoUrl: {
         type: String, // Path to the video file
         required: true,

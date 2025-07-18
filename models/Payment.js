@@ -64,6 +64,16 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     default: 18, // 18% GST
   },
+  // New fields for coupon integration
+  couponCodeApplied: {
+    type: String,
+    required: false,
+  },
+  discountApplied: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
 })
 
 module.exports = mongoose.model("Payment", paymentSchema)

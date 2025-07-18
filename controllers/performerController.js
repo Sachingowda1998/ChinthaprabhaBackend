@@ -618,3 +618,91 @@ exports.getAllCourses = async (req, res) => {
     res.status(500).json({ message: "Error fetching courses", error: error.message })
   }
 }
+
+
+
+
+// Edit comment
+exports.editComment = async (req, res) => {
+  try {
+    const { videoId, commentId } = req.params
+    const { userId, comment } = req.body
+
+    const video = await PractiseVideo.findById(videoId)
+    if (!video) {
+      return res.status(404).json({ message: "Video not found" })
+    }
+
+    const commentIndex = video.comments.findIndex(
+      (c) => c._id.toString() === commentId
+    )
+
+    if (commentIndex === -1) {
+      return res.status(404).json({ message: "Comment not found" })
+    }
+
+    // Check if the user owns the comment
+    if (video.comments[commentIndex].userId.toString() !== userId) {
+      return res.status(403).json({ message: "You can only edit your own comments" })
+    }
+
+    // Update the comment
+    video.comments[commentIndex].comment = comment
+    video.comments[commentIndex].updatedAt = new Date()
+
+    await video.save()
+
+    const user = await User.findById(userId, "name image")
+
+    const responseComment = {
+      ...video.comments[commentIndex].toObject(),
+      user: user,
+    }
+
+    res.status(200).json({
+      message: "Comment updated successfully",
+      comment: responseComment,
+    })
+  } catch (error) {
+    console.error("Error editing comment:", error)
+    res.status(500).json({ message: "Error editing comment", error: error.message })
+  }
+}
+
+// Delete comment
+exports.deleteComment = async (req, res) => {
+  try {
+    const { videoId, commentId } = req.params
+    const { userId } = req.body
+
+    const video = await PractiseVideo.findById(videoId)
+    if (!video) {
+      return res.status(404).json({ message: "Video not found" })
+    }
+
+    const commentIndex = video.comments.findIndex(
+      (c) => c._id.toString() === commentId
+    )
+
+    if (commentIndex === -1) {
+      return res.status(404).json({ message: "Comment not found" })
+    }
+
+    // Check if the user owns the comment
+    if (video.comments[commentIndex].userId.toString() !== userId) {
+      return res.status(403).json({ message: "You can only delete your own comments" })
+    }
+
+    // Remove the comment
+    video.comments.splice(commentIndex, 1)
+    await video.save()
+
+    res.status(200).json({
+      message: "Comment deleted successfully",
+      totalComments: video.comments.length,
+    })
+  } catch (error) {
+    console.error("Error deleting comment:", error)
+    res.status(500).json({ message: "Error deleting comment", error: error.message })
+  }
+}

@@ -7,6 +7,7 @@ const upload = require("../middleware/multerConfig");
 // Create a new teacher
 router.post("/teachers", upload.fields([
     { name: 'subjectImage', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 },
     { name: 'videoUrl', maxCount: 1 }
 ]), TeacherController.createTeacher);
 
@@ -19,12 +20,12 @@ router.get("/teachers/:id", TeacherController.getTeacherById);
 // Update a teacher by ID
 router.put("/teachers/:id", upload.fields([
     { name: 'subjectImage', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 },
     { name: 'videoUrl', maxCount: 1 }
 ]), TeacherController.updateTeacher);
 
 // Delete a teacher by ID
 router.delete("/teachers/:id", TeacherController.deleteTeacher);
-
 
 router.post("/teachers/:id/like", TeacherController.likeTeacher);
 
@@ -35,4 +36,5 @@ router.get("/teachers/:id/comments", TeacherController.getComments);
 
 // Delete a comment
 router.delete("/teachers/:id/comments/:commentId", TeacherController.deleteComment);
+
 module.exports = router;

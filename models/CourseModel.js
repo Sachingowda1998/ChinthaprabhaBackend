@@ -66,15 +66,16 @@ module.exports = mongoose.model("Course", courseSchema); */
 
 
 
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const courseSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  instructor: { type: String, required: true },
-  description: { type: String, required: true },  // about guru
+  // Changed instructor to reference TeacherLogin model
+  instructor: { type: mongoose.Schema.Types.ObjectId, ref: "TeacherLogin", required: true },
+  description: { type: String, required: true }, // about guru
   image: { type: String, required: true }, // URL to the course image
   lessons: [{ type: mongoose.Schema.Types.ObjectId, ref: "Lesson" }], // Array of lesson references
   price: { type: Number, required: true },
-});
+})
 
-module.exports = mongoose.model("Course", courseSchema);
+module.exports = mongoose.model("Course", courseSchema)

@@ -7,6 +7,8 @@ const {
   likeVideo,
   addComment,
   getVideoDetails,
+  editComment,
+  deleteComment,
 } = require("../controllers/performerController")
 
 const router = express.Router()
@@ -28,6 +30,13 @@ router.post("/video/:videoId/like", likeVideo)
 
 // Add comment to a video
 router.post("/video/:videoId/comment", addComment)
+
+
+// Edit a comment
+router.put("/video/:videoId/comment/:commentId", editComment)
+
+// Delete a comment
+router.delete("/video/:videoId/comment/:commentId", deleteComment)
 
 // Get video details with likes and comments
 router.get("/video/:videoId", getVideoDetails)

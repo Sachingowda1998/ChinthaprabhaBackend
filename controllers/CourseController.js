@@ -245,7 +245,8 @@ const path = require("path")
 // Get all courses
 exports.getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find().populate("lessons")
+    // Populate the instructor field to get teacher details
+    const courses = await Course.find().populate("lessons").populate("instructor", "name")
     res.status(200).json(courses)
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message })
@@ -255,7 +256,8 @@ exports.getAllCourses = async (req, res) => {
 // Get a course by ID
 exports.getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id).populate("lessons")
+    // Populate the instructor field to get teacher details
+    const course = await Course.findById(req.params.id).populate("lessons").populate("instructor", "name")
     if (!course) {
       return res.status(404).json({ message: "Course not found" })
     }
@@ -284,7 +286,7 @@ exports.createCourse = async (req, res) => {
       name,
       description,
       price,
-      instructor,
+      instructor, // instructor is now an ID
       image: imagePath,
     })
 
@@ -310,7 +312,7 @@ exports.updateCourse = async (req, res) => {
       name,
       description,
       price,
-      instructor,
+      instructor, // instructor is now an ID
       ...(imagePath && { image: imagePath }), // Update image only if a new one is provided
     }
 

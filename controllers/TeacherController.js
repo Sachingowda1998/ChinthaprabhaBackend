@@ -8,12 +8,14 @@ const createTeacher = async (req, res) => {
     try {
         const { subject, name } = req.body;
         const subjectImage = req.files['subjectImage'] ? await uploadFile2(req.files['subjectImage'][0], "category") : undefined;
+        const thumbnail = req.files['thumbnail'] ? await uploadFile2(req.files['thumbnail'][0], "category") : undefined;
         const videoUrl = req.files['videoUrl'] ? await uploadFile2(req.files['videoUrl'][0], "category") : undefined;
 
         const newTeacher = new Teacher({
             subject,
             name,
             subjectImage,
+            thumbnail,
             videoUrl,
         });
 
@@ -51,13 +53,19 @@ const getTeacherById = async (req, res) => {
 const updateTeacher = async (req, res) => {
     try {
         const { subject, name } = req.body;
-          const subjectImage = req.files['subjectImage'] ? await uploadFile2(req.files['subjectImage'][0], "category") : undefined;
+        const subjectImage = req.files['subjectImage'] ? await uploadFile2(req.files['subjectImage'][0], "category") : undefined;
+        const thumbnail = req.files['thumbnail'] ? await uploadFile2(req.files['thumbnail'][0], "category") : undefined;
         const videoUrl = req.files['videoUrl'] ? await uploadFile2(req.files['videoUrl'][0], "category") : undefined;
 
+        // Build update object with only provided fields
+        const updateData = { subject, name };
+        if (subjectImage) updateData.subjectImage = subjectImage;
+        if (thumbnail) updateData.thumbnail = thumbnail;
+        if (videoUrl) updateData.videoUrl = videoUrl;
 
         const updatedTeacher = await Teacher.findByIdAndUpdate(
             req.params.id,
-            { subject, name, subjectImage, videoUrl },
+            updateData,
             { new: true }
         );
 
@@ -82,7 +90,6 @@ const deleteTeacher = async (req, res) => {
         res.status(500).json({ message: "Error deleting teacher", error: error.message });
     }
 };
-
 
 const likeTeacher = async (req, res) => {
     try {
@@ -118,6 +125,7 @@ const likeTeacher = async (req, res) => {
         res.status(500).json({ message: "Error toggling like", error: error.message });
     }
 };
+
 // Add a comment
 const addComment = async (req, res) => {
     try {
@@ -143,6 +151,7 @@ const addComment = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 const getComments = async (req, res) => {
     try {
         const { id } = req.params; // Teacher ID
@@ -180,7 +189,6 @@ const deleteComment = async (req, res) => {
     }
 };
 
-
 module.exports = {
     createTeacher,
     getAllTeachers,
@@ -191,5 +199,4 @@ module.exports = {
     addComment,
     getComments,
     deleteComment,
-
 };
