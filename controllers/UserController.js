@@ -332,24 +332,7 @@ exports.updateUser = async (req, res) => {
 }
 
 // Fetch all users
-exports.getAllUsers = async (req, res) => {
-  try {
-    // Fetch all users from the database
-    const users = await User.find().select("-password -otp") // Exclude password and otp
 
-    if (users.length === 0) {
-      return res.status(404).json({ message: "No users found" })
-    }
-
-    res.status(200).json({
-      message: "Users fetched successfully",
-      users,
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Error fetching users" })
-  }
-}
 
 exports.deleteUser = async (req, res) => {
   const { userId } = req.params
@@ -366,7 +349,7 @@ exports.deleteUser = async (req, res) => {
     console.error("Error deleting user:", error)
     res.status(500).json({ message: "Error deleting user" })
   }
-}
+}     
 
 // New: Helper function to credit user's wallet (for internal use)
 exports.creditUserWallet = async (userId, amount, description, relatedEntity = null, relatedModel = null) => {
@@ -427,6 +410,25 @@ exports.getWalletBalance = async (req, res) => {
   } catch (error) {
     console.error("Error fetching wallet balance:", error)
     res.status(500).json({ message: "Error fetching wallet balance" })
+  }
+}
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Fetch all users from the database
+    const users = await User.find().select("-password -otp") // Exclude password and otp
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: "No users found" })
+    }
+
+    res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Error fetching users" })
   }
 }
 

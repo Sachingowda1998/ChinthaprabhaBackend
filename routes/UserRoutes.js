@@ -54,3 +54,4 @@ router.get("/user/:userId/wallet-history", UserController.getWalletHistory)
 router.get("/admin/referral-earnings", UserController.getReferralEarnings)
 
 module.exports = router
+           

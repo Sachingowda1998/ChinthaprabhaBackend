@@ -117,6 +117,21 @@ const createMulterConfig = (uploadType, options = {}) => {
 
 // Method 3: Pre-configured multer instances for different upload types
 const uploadConfigs = {
+
+performances: {
+  instance: createMulterConfig("performances", {
+    fileSize: 100 * 1024 * 1024,
+    allowedTypes: ["jpeg", "jpg", "png", "webp", "mp4", "mov", "avi"],
+    maxFiles: 3,
+  }),
+  options: {
+    fileSize: 100 * 1024 * 1024,
+    allowedTypes: ["jpeg", "jpg", "png", "webp", "mp4", "mov", "avi"],
+    maxFiles: 3,
+  }
+},
+
+
   // Banner uploads
   banners: createMulterConfig("banners", {
     fileSize: 5 * 1024 * 1024, // 5MB
@@ -252,4 +267,5 @@ module.exports = {
   categoryUpload: uploadConfigs.categories,
   subcategoryUpload: uploadConfigs.subcategories,
   instrumentUpload: uploadConfigs.instruments,
+   performanceUpload: uploadConfigs.performances,
 };

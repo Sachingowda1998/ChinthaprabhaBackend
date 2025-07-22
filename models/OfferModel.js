@@ -23,6 +23,10 @@ const OfferSchema = new mongoose.Schema(
       type: String, // Path to the thumbnail image file for video
       required: false,
     },
+    videoLink: {
+    type: String, // YouTube or other external link
+    required: false
+  },
     video: {
       type: String, // Path to the video file
       required: false,
