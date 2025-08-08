@@ -80,6 +80,7 @@ const chatRoutes = require("./routes/ChatRoutes") // Your new chat routes
 const musicQuote =require ("./routes/MusicQuoteRoute.js")
 const Performer = require("./routes/performanceRoute.js")
 const audienceReview=require('./routes/AudienceRoute.js')
+const reportRoutes = require("./routes/reportRoutes")
 
 // Use Routes
 app.use("/chinthanaprabha/discount", OfferRoutes)
@@ -110,6 +111,7 @@ app.use("/chinthanaprabha/performers", performerRoutes)
 app.use("/api/musicQuote", musicQuote)
 app.use("/api/performance", Performer)
 app.use("/api/audienceReview", audienceReview)
+app.use('/chinthanaprabha/reports', reportRoutes)
 
 // Socket.IO connection handling
 io.on("connection", (socket) => {
