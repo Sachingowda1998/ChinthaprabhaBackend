@@ -1,5 +1,5 @@
 const { uploadFile2, deleteFile } = require('../middleware/aws');
-const { PerformanceModel } = require('../models/performanceModel');
+const { PerformanceModel } = require('../models/PerformanceModel');
 
 // CREATE Performance
 exports.createPerformance = async (req, res) => {
