@@ -352,32 +352,70 @@ exports.getPurchasedCourses = async (req, res) => {
   try {
     const { userId } = req.params
 
-    const payments = await Payment.find({
-      userId,
-      status: "completed",
-    }).populate("courseId", "name image price lessons instructor")
+    console.log("Fetching purchased courses for user:", userId)
 
-    if (!payments || payments.length === 0) {
-      return res.status(404).json({
-        message: "No purchased courses found for this user.",
+    // Validate userId
+    if (!userId) {
+      return res.status(400).json({
+        message: "User ID is required.",
       })
     }
 
-    const purchasedCourses = payments.map((payment) => ({
-      ...payment.courseId.toObject(),
-      paymentDetails: {
-        transactionId: payment.transactionId,
-        totalAmount: payment.totalAmount,
-        paymentDate: payment.paymentDate,
-        paymentMethod: payment.paymentMethod,
-        couponCodeApplied: payment.couponCodeApplied, // Include coupon info
-        discountApplied: payment.discountApplied, // Include discount info
+    const payments = await Payment.find({
+      userId,
+      status: "completed",
+    }).populate({
+      path: "courseId",
+      select: "name image price lessons instructor",
+      populate: {
+        path: "instructor",
+        select: "name",
+        // Add this to handle missing instructor references gracefully
+        options: { strictPopulate: false },
       },
-    }))
+    })
 
+    console.log("Found payments:", payments.length)
+
+    if (!payments || payments.length === 0) {
+      return res.status(200).json([]) // Return empty array instead of 404
+    }
+
+    const purchasedCourses = payments
+      .filter((payment) => payment.courseId) // Filter out payments with missing courses
+      .map((payment) => {
+        const courseData = payment.courseId.toObject()
+
+        // Handle missing instructor gracefully
+        if (!courseData.instructor) {
+          courseData.instructor = { name: "Unknown Instructor" }
+        }
+
+        return {
+          ...courseData,
+          paymentDetails: {
+            transactionId: payment.transactionId,
+            totalAmount: payment.totalAmount,
+            paymentDate: payment.paymentDate,
+            paymentMethod: payment.paymentMethod,
+            couponCodeApplied: payment.couponCodeApplied,
+            discountApplied: payment.discountApplied,
+          },
+        }
+      })
+
+    console.log("Returning purchased courses:", purchasedCourses.length)
     res.status(200).json(purchasedCourses)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error("Error in getPurchasedCourses:", err)
+    console.error("Error stack:", err.stack)
+
+    // Return a more specific error message
+    res.status(500).json({
+      error: "Failed to fetch purchased courses",
+      message: err.message,
+      details: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    })
   }
 }
 
