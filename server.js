@@ -16,20 +16,18 @@ dotenv.config()
 // Initialize Express app
 const app = express()
 const server = http.createServer(app) // Create HTTP server from Express app
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow all origins for development, restrict in production
+    methods: ["GET", "POST"],
+  },
+})
 
-const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? ["https://cpsangeetha.com", "https://www.cpsangeetha.com"] // Add your production domains
-      : ["http://localhost:3000", "http://localhost:3001"],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}
-
-app.use(cors(corsOptions))
-
+// Middleware to parse JSON
 app.use(express.json())
+
+// Enable CORS for all routes
+app.use(cors())
 
 app.use(morgon("dev"))
 // Use Helmet for added security headers
@@ -79,9 +77,9 @@ const OrderRoutes = require("./routes/OrderRoutes")
 const performerRoutes = require("./routes/performerRoutes")
 const OfferRoutes = require("./routes/OfferRoutes")
 const chatRoutes = require("./routes/ChatRoutes") // Your new chat routes
-const musicQuote = require("./routes/MusicQuoteRoute.js")
+const musicQuote =require ("./routes/MusicQuoteRoute.js")
 const Performer = require("./routes/performanceRoute.js")
-const audienceReview = require("./routes/AudienceRoute.js")
+const audienceReview=require('./routes/AudienceRoute.js')
 const reportRoutes = require("./routes/reportRoutes")
 
 // Use Routes
@@ -113,31 +111,16 @@ app.use("/chinthanaprabha/performers", performerRoutes)
 app.use("/api/musicQuote", musicQuote)
 app.use("/api/performance", Performer)
 app.use("/api/audienceReview", audienceReview)
-app.use("/chinthanaprabha/reports", reportRoutes)
-
-const io = new Server(server, {
-  cors: corsOptions,
-  transports: ["websocket", "polling"], // Ensure both transports work
-  allowEIO3: true, // Backward compatibility
-  pingTimeout: 60000,
-  pingInterval: 25000,
-})
+app.use('/chinthanaprabha/reports', reportRoutes)
 
 // Socket.IO connection handling
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id)
 
-  // Handle connection errors
-  socket.on("connect_error", (error) => {
-    console.error("Socket connection error:", error)
-  })
-
   // Join a room based on a consistent room name
   socket.on("joinRoom", ({ roomName }) => {
     socket.join(roomName)
     console.log(`User ${socket.id} joined room: ${roomName}`)
-
-    socket.emit("roomJoined", { roomName, socketId: socket.id })
   })
 
   // Handle sending messages
@@ -185,8 +168,8 @@ io.on("connection", (socket) => {
     }
   })
 
-  socket.on("disconnect", (reason) => {
-    console.log("User disconnected:", socket.id, "Reason:", reason)
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id)
   })
 })
 
@@ -199,7 +182,6 @@ app.get("*", (req, res) => {
 })
 
 const PORT = process.env.PORT || 5000
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`)
-  console.log(`Environment: ${process.env.NODE_ENV || "development"}`)
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`)
 })
