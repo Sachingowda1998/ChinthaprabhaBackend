@@ -1,4 +1,4 @@
-// Assuming this is your main server file
+
 const express = require("express")
 const mongoose = require("mongoose")
 const dotenv = require("dotenv")
@@ -28,6 +28,10 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions))
+
+app.use(express.json({ limit: "5gb" }));
+app.use(express.urlencoded({ limit: "5gb", extended: true }));
+
 
 app.use(express.json())
 
